@@ -21,6 +21,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <sstream>
 
 #include "Background.h"
 #include "Board.h"
@@ -104,6 +105,7 @@ private:
     int delay = ITEM_FREQ;
     int countDownBall = COUNT_DOWN;
     int countDownPaddle = COUNT_DOWN;
+    unsigned int lastTime = 0;
     void raiseItem();
 
     bool isPowerUp(Item* item);

@@ -28,7 +28,7 @@ Board::Board(SDL_Renderer* renderer): Object(renderer) {
 
     TTF_Font* score_font = TTF_OpenFont("font//arcade.ttf", 60);
     if ( score_font == NULL) {
-        std::cout << "Error load font: " << SDL_GetError() << std::endl;
+        std::cout << "Error load score font: " << SDL_GetError() << std::endl;
     }
     SDL_Color WHITE = {255,255,255,255};
 

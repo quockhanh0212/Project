@@ -348,7 +348,6 @@ void Game::NewGame()
     explosion_frame = 0;
     LifeCount = 3;
     GameScore = 0;
-    HighScore = 0;
     hit_times = 0;
     level = 0;
     onetime_1 = true;
@@ -455,14 +454,12 @@ void Game::ResetBall()
 void Game::Update(float delta)
 {
 
-
-    raiseItem();
     for (int i = 0; i < Items.size(); i++)
     {
         Items[i]->Update(delta);
         powerUpChange(Items[i]);
     }
-
+    raiseItem();
 
     int mouseX, mouseY;
     Uint8 mouse_state = SDL_GetMouseState(&mouseX, &mouseY);
@@ -677,8 +674,12 @@ void Game::isBrickCollides2()
 
                     if ( Mix_PlayChannel(-1,brickhit,0) == -1)
                         std:: cout << "Error playing brick sound: " << Mix_GetError << std::endl;
-                    board -> bricks[i][j].status--; // Update broken bricks
+                    if (ball->isBigBall()) board -> bricks[i][j].status-= 2;
+                    else board -> bricks[i][j].status--;
+
+                    // Update broken bricks
                     hit_times++;
+
 
                     if ( board -> bricks[i][j].status == 0 )
                     {
@@ -984,7 +985,7 @@ void Game:: ScoreUpdate(int score, int highscore, int hit)
 
     SDL_RenderPresent(renderer);
     SDL_DestroyTexture(Score);
-
+    SDL_DestroyTexture(HighScore);
     TTF_CloseFont(score_font);
 }
 
@@ -1008,19 +1009,16 @@ bool Game::isPowerUp(Item* item)
 
 void Game::powerUpChange(Item* item)
 {
-    bool check = isPowerUp(item);
-    int currentTime, lastTime = 0;
-    if (check)
+    if (isPowerUp(item))
     {
+        item->y = 800;
         switch(item->itemChosen)
         {
         case 0:
             ball->bigBall();
-            countDownBall = COUNT_DOWN;
             break;
         case 1:
             paddle->expandPaddle();
-            countDownPaddle = COUNT_DOWN;
             break;
         default:
             break;
@@ -1031,15 +1029,24 @@ void Game::powerUpChange(Item* item)
         switch(item->itemChosen)
         {
         case 0:
-            if (countDownBall > 0)countDownBall--;
-            if (countDownBall <= 0) ball->normalBall();
+            std::cout << SDL_GetTicks() - lastTime << std::endl;
+            if (SDL_GetTicks() > 5000 + lastTime)
+            {
+                lastTime = SDL_GetTicks();
+                ball->normalBall();
+            }
             break;
         case 1:
-            if (countDownPaddle > 0)countDownPaddle--;
-            if (countDownPaddle <= 0) paddle->normalPaddle();
+            std::cout << SDL_GetTicks() - lastTime << std::endl;
+            if (SDL_GetTicks() > 5000 + lastTime)
+            {
+                lastTime = SDL_GetTicks();
+                paddle->normalPaddle();
+            }
+            break;
+        default:
             break;
         }
     }
-
 }
 

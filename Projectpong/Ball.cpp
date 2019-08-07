@@ -21,7 +21,7 @@ Ball::~Ball() {
 void Ball::Update(float delta) {
     x += dirx * delta;
     y += diry * delta;
-    setBallSpeed();
+    //setBallSpeed();
 }
 
 void Ball::Render(float delta) {
@@ -50,6 +50,11 @@ void Ball::normalBall()
 {
     height = 24;
     width = 24;
+}
+
+bool Ball::isBigBall()
+{
+    return (width == 48 && height == 48);
 }
 
 void Ball::setBallSpeed()

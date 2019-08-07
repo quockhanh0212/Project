@@ -28,6 +28,7 @@ public:
     float dirx, diry;
 
     void bigBall();
+    bool isBigBall();
     void normalBall();
     void setBallSpeed();
 
