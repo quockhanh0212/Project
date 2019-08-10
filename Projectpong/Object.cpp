@@ -1,8 +1,8 @@
 #include "Object.h"
 
-Object::Object(SDL_Renderer* renderer) {
-    this->renderer = renderer;
+SDL_Renderer* Object::renderer = nullptr;
 
+Object::Object() {
     x = 0;
     y = 0;
     width = 1;

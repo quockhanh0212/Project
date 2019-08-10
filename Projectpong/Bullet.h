@@ -13,6 +13,7 @@ public:
     ~Bullet();
 
     void Update(float delta);
+    void Render(float delta);
 
 private:
     SDL_Texture* texture;

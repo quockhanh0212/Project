@@ -1,6 +1,6 @@
 #include "Board.h"
 
-Board::Board(SDL_Renderer* renderer): Object(renderer) {
+Board::Board(SDL_Renderer* renderer) {
 
     SDL_Surface* surface = IMG_Load("PNG//bricks.png");
     bricktexture = SDL_CreateTextureFromSurface(renderer, surface);
@@ -118,13 +118,6 @@ void Board::Render(float delta) {
     drect.h = 250;
     SDL_RenderCopy(renderer, logotexture, 0 , &drect);
 
-    /*SDL_Rect explosionRect;
-    explosionRect.x = 200;
-    explosionRect.y = 200;
-    explosionRect.w = 2*BOARD_BRWIDTH;
-    explosionRect.h = 2*BOARD_BRHEIGHT;
-    SDL_RenderCopy(renderer, explosiontexture, 0 , &explosionRect);
-    */
 
     // Render heart
     for ( int i = 0 ; i < HEARTCOUNT; i++ ) {
@@ -154,6 +147,7 @@ void Board::Render(float delta) {
     highscoreWordRect.w = 250;
     highscoreWordRect.h = 100;
     SDL_RenderCopy(renderer, highscoreWordTexture, 0 , &highscoreWordRect);
+
 }
 
 void Board::CreateLevel() {
@@ -175,7 +169,7 @@ void Board::CreateLevel() {
             }
 
             else {
-                brick.type = rand() % (4 - 0 + 1) + 0;
+                brick.type = rand() % (4 - 0 + 1);
                 brick.status = 2;
             }
             bricks[i][j] = brick;

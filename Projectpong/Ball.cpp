@@ -1,6 +1,6 @@
 #include "Ball.h"
 
-Ball::Ball(SDL_Renderer* renderer): Object(renderer) {
+Ball::Ball(SDL_Renderer* renderer) {
     SDL_Surface* surface = IMG_Load("PNG//ball.png");
     texture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
@@ -46,15 +46,21 @@ void Ball::bigBall()
     height = 48;
 }
 
+bool Ball::isBigBall()
+{
+    return (width == 48 && height == 48);
+}
+
 void Ball::normalBall()
 {
     height = 24;
     width = 24;
 }
 
-bool Ball::isBigBall()
+void Ball::smallBall()
 {
-    return (width == 48 && height == 48);
+    width = 12;
+    height = 12;
 }
 
 void Ball::setBallSpeed()
@@ -67,4 +73,9 @@ void Ball::setBallSpeed()
     }
 
 }
+
+//void Ball::setBallBeginPosition()
+//{
+//
+//}
 

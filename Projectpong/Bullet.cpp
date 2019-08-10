@@ -1,12 +1,13 @@
 #include "Bullet.h"
 
-Bullet::Bullet(SDL_Renderer* renderer): Object(renderer) {
+Bullet::Bullet(SDL_Renderer* renderer) {
 
     SDL_Surface* surface = IMG_Load("PNG//bullet.png");
     texture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
 
 
+    y = 610;
 }
 
 Bullet::~Bullet() {
@@ -17,9 +18,18 @@ Bullet::~Bullet() {
 
 void Bullet::Update(float delta)
 {
-    y-= 30;
+    y-= 1.2;
 }
 
+void Bullet::Render(float delta)
+{
+    SDL_Rect bulletRect;
+    bulletRect.x = x;
+    bulletRect.y = y;
+    bulletRect.w = 15;
+    bulletRect.h = 12;
+    SDL_RenderCopy(renderer, texture, 0, &bulletRect);
+}
 
 
 

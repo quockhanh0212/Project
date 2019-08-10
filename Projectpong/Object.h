@@ -8,7 +8,7 @@
 
 class Object {
 public:
-    Object(SDL_Renderer* renderer);
+    Object();
     virtual ~Object();
 
     float x, y, width, height;
@@ -17,8 +17,10 @@ public:
     virtual void Render(float delta);
 
     bool IsCollides(Object* other);
+
+    static void setRenderer(SDL_Renderer* _renderer) { renderer = _renderer; }
 protected:
-    SDL_Renderer* renderer;
+    static SDL_Renderer* renderer;
 
 };
 

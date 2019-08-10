@@ -1,11 +1,12 @@
 #ifndef ITEM_H_
 #define ITEM_H_
 
-#define BIGBALL 1
-#define EXPAND 2
+#define BIGBALL 0
+#define EXPAND 1
+#define GUN 2
 #define TRIPLE 3
 
-const float ITEM_SPEED = 1.5;
+const float ITEM_SPEED = 2;
 
 
 #include "Object.h"
@@ -23,8 +24,10 @@ public:
     void Render(float delta);
     int itemChosen;
 
+    static void loadTexture();
+
 private:
-    SDL_Texture* texture[3];
+    static SDL_Texture* texture[4];
     int speed;
 };
 

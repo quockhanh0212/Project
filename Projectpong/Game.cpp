@@ -5,12 +5,15 @@ Mix_Music *music = NULL;
 Mix_Chunk *hit_sound = NULL;
 Mix_Chunk *levelup = NULL;
 Mix_Chunk *brickhit = NULL;
+Mix_Chunk *bighit = NULL;
 Mix_Chunk *welldone = NULL;
 
 Game::Game()
 {
     window = 0;
     renderer = 0;
+
+    srand(time(0));
 }
 
 Game::~Game()
@@ -34,6 +37,7 @@ bool Game::Init()
 
 
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    Object::setRenderer(renderer);
     if (!renderer)
     {
         std::cout << "Error creating renderer:" << SDL_GetError() << std::endl;
@@ -51,6 +55,7 @@ bool Game::Init()
         std::cout << "Mixer could not initialize!" << SDL_GetError() << std::endl;
         success = false;
     }
+    Item::loadTexture();
 
 
     last_tick = SDL_GetTicks();
@@ -75,6 +80,10 @@ bool Game::Init()
     if (brickhit == NULL )
         std::cout << "Error loading hit sound: " << SDL_GetError() << std:: endl;
 
+    bighit = Mix_LoadWAV("Sound//bighit.mp3");
+    if (bighit == NULL )
+        std::cout << "Error loading hit sound: " << SDL_GetError() << std:: endl;
+
     welldone = Mix_LoadWAV("Sound//WellDone.wav");
     if (welldone == NULL )
         std::cout << "Error loading hit sound: " << SDL_GetError() << std:: endl;
@@ -94,6 +103,7 @@ void Game::Clean()
     Mix_FreeChunk(welldone);
     Mix_FreeChunk(levelup);
     Mix_FreeChunk(brickhit);
+    Mix_FreeChunk(bighit);
 }
 
 void Game::Run()
@@ -104,7 +114,9 @@ void Game::Run()
     background = new Background (renderer);
     board = new Board(renderer);
     paddle = new Paddle(renderer);
-    ball = new Ball(renderer);
+
+    Ball* ball = new Ball(renderer);
+    Balls.push_back(ball);
     NewGame();
 
 
@@ -125,7 +137,7 @@ void Game::Run()
 
         // Calculate delta and fps
         unsigned int current_tick = SDL_GetTicks();
-        float delta = (current_tick - last_tick) / 1000.0f;
+        delta = (current_tick - last_tick) / 1000.0f;
 
         if (current_tick - fps_tick >= FPS_DELAY)
         {
@@ -180,14 +192,15 @@ void Game::Run()
 
     }
     delete paddle;
-    delete ball;
     delete background;
     delete board;
+    Balls.erase(Balls.begin());
 
     for (int i = 0; i<Items.size(); i++)
     {
         delete Items[i];
     }
+
 
     Clean();
 
@@ -223,9 +236,6 @@ void Game::GameMenu()
     TTF_Font* TittleFont = NULL;
     TTF_Font* GameFont = NULL;
 
-
-    //SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-    // SDL_RenderClear(renderer);
 
     TittleFont = TTF_OpenFont("font//pdark.ttf",800);
     if (TittleFont == NULL)
@@ -264,7 +274,7 @@ void Game::GameMenu()
     StartRect.y = 300;
     StartRect.w = 200;
     StartRect.h = 100;
-    SDL_RenderCopy(renderer, wStart, 0, &StartRect);
+    SDL_RenderCopy(renderer, rStart, 0, &StartRect);
 
     std:: string exit_text = "EXIT";
     gSurface = TTF_RenderText_Solid(GameFont, exit_text.c_str(), WHITE);
@@ -282,13 +292,13 @@ void Game::GameMenu()
     ExitRect.h = 95;
     SDL_RenderCopy(renderer, wExit, 0, &ExitRect);
 
-
     SDL_RenderPresent(renderer);
 
-    int start = 0 ;
+
     while (success)
     {
         SDL_Event g_event;
+
         while (SDL_PollEvent(&g_event))
         {
             if (g_event.type == SDL_QUIT)
@@ -303,8 +313,8 @@ void Game::GameMenu()
                 switch (g_event.key.keysym.sym)
                 {
                 case SDLK_UP:
-                    SDL_RenderCopy(renderer, rStart, 0, &StartRect);
                     SDL_RenderCopy(renderer, wExit, 0, &ExitRect);
+                    SDL_RenderCopy(renderer, rStart, 0, &StartRect);
                     SDL_RenderPresent(renderer);
                     start = 1;
                     break;
@@ -441,11 +451,12 @@ void Game :: Gameover()
 void Game::ResetPaddle()
 {
     paddlestick = true;
-    ResetBall();
+    ResetBall(Balls[0]);
+    //ResetBullet(bullet);
     hit_times = 0;
 }
 
-void Game::ResetBall()
+void Game::ResetBall(Ball* ball)
 {
     ball->x = paddle->x + paddle->width/2 - ball->width/2;
     ball->y = paddle->y - ball->height;
@@ -461,6 +472,7 @@ void Game::Update(float delta)
     }
     raiseItem();
 
+
     int mouseX, mouseY;
     Uint8 mouse_state = SDL_GetMouseState(&mouseX, &mouseY);
     SetPaddleX(mouseX - paddle->width/2.0f);
@@ -470,25 +482,32 @@ void Game::Update(float delta)
         if (paddlestick)
         {
             paddlestick = false;
-            ball->SetDirection(1, 1);
+            //Balls[0]->SetDirection(1, 1);
+            for (int i = 0; i<Balls.size(); i++)
+            {
+                Balls[i]->SetDirection(1, 1);
+            }
         }
     }
 
     if (paddlestick)
     {
-        ResetBall();
+        ResetBall(Balls[0]);
     }
 
     isBoardCollides();
     isPaddleCollides();
-    isBrickCollides2();
+    isBrickCollides();
 
     board->Update(delta);
-    //Explosion();
     paddle->Update(delta);
 
+
     if (!paddlestick)
-        ball->Update(delta);
+        for (int i = 0; i<Balls.size(); i++)
+        {
+            Balls[i]->Update(delta);
+        }
 
 }
 
@@ -515,34 +534,44 @@ void Game::SetPaddleX(float x)
 void Game::isBoardCollides()
 {
     // Top and bottom collisions
-    if (ball->y < board->y)
+    for (int i = 0; i<Balls.size(); i++)
     {
-        // Top
-        ball->y = board->y;
-        ball->diry *= -1;
-    }
-    else if (ball->y > board->y + board->height)
-    {
-        // Bottom
-
-        // Ball lost
-        LifeCount--;
-        board -> hearts[LifeCount].state = false;
-        ResetPaddle();
+        if (Balls[i]->y < board->y)
+        {
+            // Top
+            Balls[i]->y = board->y;
+            Balls[i]->diry *= -1;
+        }
+        else if (Balls[i]->y > board->y + board->height)
+        {
+            // Bottom
+            Balls.erase(Balls.begin()+i);
+            // Ball lost
+            if (Balls.size() == 0)
+            {
+                LifeCount--;
+                board -> hearts[LifeCount].state = false;
+                ResetPaddle();
+                Balls.push_back(new Ball(renderer));
+            }
+        }
     }
 
     // Left and right collision
-    if (ball->x <= board->x)
+    for (int i = 0; i<Balls.size(); i++)
     {
-        // Left
-        ball->x = board->x;
-        ball->dirx *= -1;
-    }
-    else if (ball->x + ball->width >= board->x + board->width)
-    {
-        // Right
-        ball->x = board->x + board->width - ball->width;
-        ball->dirx *= -1;
+        if (Balls[i]->x <= board->x)
+        {
+            // Left
+            Balls[i]->x = board->x;
+            Balls[i]->dirx *= -1;
+        }
+        else if (Balls[i]->x + Balls[i]->width >= board->x + board->width)
+        {
+            // Right
+            Balls[i]->x = board->x + board->width - Balls[i]->width;
+            Balls[i]->dirx *= -1;
+        }
     }
 }
 
@@ -569,208 +598,162 @@ float Game::GetReflection(float hitx)
 
 void Game::isPaddleCollides()
 {
-    // Get the center x-coordinate of the ball
-    float ballcenterx = ball->x + ball->width / 2.0f;
 
-    // Check paddle collision
-    if (ball->IsCollides(paddle))
+    for (int i = 0; i<Balls.size(); i++)
     {
-        hit_times = 0;
-        ball->y = paddle->y - ball->height;
-        ball->SetDirection(GetReflection(ballcenterx - paddle->x), -1);
-        if ( Mix_PlayChannel(-1,hit_sound,0) == -1)
-            std:: cout << "Error playing sound: " << Mix_GetError << std::endl;
-        //ball->SetDirection(0, -1);
+        // Get the center x-coordinate of the ball
+        float ballcenterx = Balls[i]->x + Balls[i]->width / 2.0f;
+
+        // Check paddle collision
+        if (Balls[i]->IsCollides(paddle))
+        {
+            hit_times = 0;
+            Balls[i]->y = paddle->y - Balls[i]->height;
+            Balls[i]->SetDirection(GetReflection(ballcenterx - paddle->x), -1);
+            if ( Mix_PlayChannel(-1,hit_sound,0) == -1)
+                std:: cout << "Error playing sound: " << Mix_GetError << std::endl;
+            //ball->SetDirection(0, -1);
+        }
     }
+
 }
 
 void Game::isBrickCollides()
 {
-    for (int i=0; i<BRICK_PER_ROW; i++)
+    for (int k = 0; k<Balls.size(); k++)
     {
-        for (int j=0; j<BRICK_PER_COL; j++)
+        for (int i=0; i<BRICK_PER_ROW; i++)
         {
-            Brick brick = board->bricks[i][j];
-
-            // Check if brick is present
-            if (brick.state)
+            for (int j=0; j<BRICK_PER_COL; j++)
             {
-                // Brick x and y coordinates
-                float brickx = board->brickoffsetx + board->x + i*BOARD_BRWIDTH;
-                float bricky = board->brickoffsety + board->y + j*BOARD_BRHEIGHT;
+                Brick brick = board->bricks[i][j];
 
-                // Check ball-brick collision
-
-                float w = 0.5f * (ball->width + BOARD_BRWIDTH);
-                float h = 0.5f * (ball->height + BOARD_BRHEIGHT);
-                float dx = (ball->x + 0.5f*ball->width) - (brickx + 0.5f*BOARD_BRWIDTH);
-                float dy = (ball->y + 0.5f*ball->height) - (bricky + 0.5f*BOARD_BRHEIGHT);
-
-                if (fabs(dx) <= w && fabs(dy) <= h)
+                // Check brick's state
+                if (brick.state)
                 {
-                    // Collision confirmed
-                    board->bricks[i][j].state = false;
+                    // Brick x and y coordinates
+                    float brickx = board->brickoffsetx + board->x + i*BOARD_BRWIDTH;
+                    float bricky = board->brickoffsety + board->y + j*BOARD_BRHEIGHT;
 
-                    float wy = w * dy;
-                    float hx = h * dx;
+                    // Center of the ball x and y coordinates
+                    float ballcenterx = Balls[k]->x + 0.5f*Balls[k]->width;
+                    float ballcentery = Balls[k]->y + 0.5f*Balls[k]->height;
 
-                    if (wy > hx)
+                    // Center of the brick x and y coordinates
+                    float brickcenterx = brickx + 0.5f*BOARD_BRWIDTH;
+                    float brickcentery = bricky + 0.5f*BOARD_BRHEIGHT;
+
+                    if (Balls[k]->x <= brickx + BOARD_BRWIDTH && Balls[k]->x+Balls[k]->width >= brickx
+                            && Balls[k]->y <= bricky + BOARD_BRHEIGHT && Balls[k]->y + Balls[k]->height >= bricky)
                     {
-                        if (wy > -hx)
+                        // // Collision confirmed, delete bricks
+
+                        if (Balls[k]->isBigBall())
                         {
-                            BallBrickResponse(3); // Bottom
+                            if ( Mix_PlayChannel(-1,bighit,0) == -1)
+                                std:: cout << "Error playing brick sound: " << Mix_GetError << std::endl;
+                            board -> bricks[i][j].status-= 2;
+                            hit_times++;
                         }
                         else
                         {
-                            BallBrickResponse(0);  // Left
+                            if ( Mix_PlayChannel(-1,brickhit,0) == -1)
+                                std:: cout << "Error playing brick sound: " << Mix_GetError << std::endl;
+                            board -> bricks[i][j].status--;
+                            hit_times++;
                         }
-                    }
-                    else
-                    {
-                        if (wy > -hx)
-                        {
-                            BallBrickResponse(2); // Right
 
+                        if ( board -> bricks[i][j].status <= 0 )
+                        {
+                            board->bricks[i][j].state = false;
+                            GameScore += hit_times * SCORE_PER_BRICK;
+
+                        }
+
+
+                        // Asume the ball goes slow enough to not skip through the bricks
+
+                        // Calculate ysize
+                        float ymin = 0;
+                        if (bricky > Balls[k]->y)
+                        {
+                            ymin = bricky;
                         }
                         else
                         {
-                            BallBrickResponse(1); // Top
+                            ymin = Balls[k]->y;
                         }
-                    }
-                    return;
-                }
-            }
-        }
-    }
-}
 
-void Game::isBrickCollides2()
-{
-    for (int i=0; i<BRICK_PER_ROW; i++)
-    {
-        for (int j=0; j<BRICK_PER_COL; j++)
-        {
-            Brick brick = board->bricks[i][j];
-
-            // Check brick's state
-            if (brick.state)
-            {
-                // Brick x and y coordinates
-                float brickx = board->brickoffsetx + board->x + i*BOARD_BRWIDTH;
-                float bricky = board->brickoffsety + board->y + j*BOARD_BRHEIGHT;
-
-                // Center of the ball x and y coordinates
-                float ballcenterx = ball->x + 0.5f*ball->width;
-                float ballcentery = ball->y + 0.5f*ball->height;
-
-                // Center of the brick x and y coordinates
-                float brickcenterx = brickx + 0.5f*BOARD_BRWIDTH;
-                float brickcentery = bricky + 0.5f*BOARD_BRHEIGHT;
-
-                if (ball->x <= brickx + BOARD_BRWIDTH && ball->x+ball->width >= brickx
-                        && ball->y <= bricky + BOARD_BRHEIGHT && ball->y + ball->height >= bricky)
-                {
-                    // // Collision confirmed, delete bricks
-
-                    if ( Mix_PlayChannel(-1,brickhit,0) == -1)
-                        std:: cout << "Error playing brick sound: " << Mix_GetError << std::endl;
-                    if (ball->isBigBall()) board -> bricks[i][j].status-= 2;
-                    else board -> bricks[i][j].status--;
-
-                    // Update broken bricks
-                    hit_times++;
-
-
-                    if ( board -> bricks[i][j].status == 0 )
-                    {
-                        board->bricks[i][j].state = false;
-                        GameScore += hit_times * SCORE_PER_BRICK;
-
-                    }
-
-
-                    // Asume the ball goes slow enough to not skip through the bricks
-
-                    // Calculate ysize
-                    float ymin = 0;
-                    if (bricky > ball->y)
-                    {
-                        ymin = bricky;
-                    }
-                    else
-                    {
-                        ymin = ball->y;
-                    }
-
-                    float ymax = 0;
-                    if (bricky+BOARD_BRHEIGHT < ball->y+ball->height)
-                    {
-                        ymax = bricky+BOARD_BRHEIGHT;
-                    }
-                    else
-                    {
-                        ymax = ball->y+ball->height;
-                    }
-
-                    float ysize = ymax - ymin;
-
-                    // Calculate xsize
-                    float xmin = 0;
-                    if (brickx > ball->x)
-                    {
-                        xmin = brickx;
-                    }
-                    else
-                    {
-                        xmin = ball->x;
-                    }
-
-                    float xmax = 0;
-                    if (brickx+BOARD_BRWIDTH < ball->x+ball->width)
-                    {
-                        xmax = brickx+BOARD_BRWIDTH;
-                    }
-                    else
-                    {
-                        xmax = ball->x+ball->width;
-                    }
-
-                    float xsize = xmax - xmin;
-
-                    // The origin is at the top-left corner of the screen
-                    // Set collision response
-                    if (xsize > ysize)
-                    {
-                        if (ballcentery > brickcentery)
+                        float ymax = 0;
+                        if (bricky+BOARD_BRHEIGHT < Balls[k]->y+Balls[k]->height)
                         {
-                            // Bottom
-                            ball->y += ysize + 0.01f; // Move out of collision
-                            BallBrickResponse(3);
+                            ymax = bricky+BOARD_BRHEIGHT;
                         }
                         else
                         {
-                            // Top
-                            ball->y -= ysize + 0.01f; // Move out of collision
-                            BallBrickResponse(1);
+                            ymax = Balls[k]->y+Balls[k]->height;
                         }
-                    }
-                    else
-                    {
-                        if (ballcenterx < brickcenterx)
+
+                        float ysize = ymax - ymin;
+
+                        // Calculate xsize
+                        float xmin = 0;
+                        if (brickx > Balls[k]->x)
                         {
-                            // Left
-                            ball->x -= xsize + 0.01f; // Move out of collision
-                            BallBrickResponse(0);
+                            xmin = brickx;
                         }
                         else
                         {
-                            // Right
-                            ball->x += xsize + 0.01f; // Move out of collision
-                            BallBrickResponse(2);
+                            xmin = Balls[k]->x;
                         }
-                    }
 
-                    return;
+                        float xmax = 0;
+                        if (brickx+BOARD_BRWIDTH < Balls[k]->x+Balls[k]->width)
+                        {
+                            xmax = brickx+BOARD_BRWIDTH;
+                        }
+                        else
+                        {
+                            xmax = Balls[k]->x+Balls[k]->width;
+                        }
+
+                        float xsize = xmax - xmin;
+
+                        // The origin is at the top-left corner of the screen
+                        // Set collision response
+                        if (xsize > ysize)
+                        {
+                            if (ballcentery > brickcentery)
+                            {
+                                // Bottom
+                                Balls[k]->y += ysize + 0.01f; // Move out of collision
+                                BallBrickResponse(3);
+                            }
+                            else
+                            {
+                                // Top
+                                Balls[k]->y -= ysize + 0.01f; // Move out of collision
+                                BallBrickResponse(1);
+                            }
+                        }
+                        else
+                        {
+                            if (ballcenterx < brickcenterx)
+                            {
+                                // Left
+                                Balls[k]->x -= xsize + 0.01f; // Move out of collision
+                                BallBrickResponse(0);
+                            }
+                            else
+                            {
+                                // Right
+                                Balls[k]->x += xsize + 0.01f; // Move out of collision
+                                BallBrickResponse(2);
+                            }
+                        }
+
+                        return;
+                    }
                 }
             }
         }
@@ -780,75 +763,76 @@ void Game::isBrickCollides2()
 
 void Game::BallBrickResponse(int dirindex)
 {
-    // Define statistic 0: Left, 1: Top, 2: Right, 3: Bottom
-
-    // Direction factors
-    int mulx = 1;
-    int muly = 1;
-
-    if (ball->dirx > 0)
+    for (int i = 0; i<Balls.size(); i++)
     {
-        // Ball => + x direction
-        if (ball->diry > 0)
-        {
-            // Ball => + y direction
+        // Direction factors
+        int mulx = 1;
+        int muly = 1;
 
-            if (dirindex == 0 || dirindex == 3)
+        if (Balls[i]->dirx > 0)
+        {
+            // Ball dang di chuyen theo chieu duong x
+            if (Balls[i]->diry > 0)
             {
-                mulx = -1;
+                // Ball dang di chuyen theo chieu duong y
+                // +1 +1
+                if (dirindex == 0)
+                {
+                    mulx = -1;
+                }
+                else if (dirindex == 1)
+                {
+                    muly = -1;
+                }
             }
-            else
+            else if (Balls[i]->diry < 0)
             {
-                muly = -1;
+                // Ball dang di chuyen theo chieu am y
+                // +1 -1
+                if (dirindex == 0)
+                {
+                    mulx = -1;
+                }
+                else if (dirindex == 3)
+                {
+                    muly = -1;
+                }
             }
         }
-        else if (ball->diry < 0)
+        else if (Balls[i]->dirx < 0)
         {
-            // Ball => - y direction
-
-            if (dirindex == 0 || dirindex == 1)
+            // Ball dang di chuyen theo chieu am x
+            if (Balls[i]->diry > 0)
             {
-                mulx = -1;
+                // Ball dang di chuyen theo chieu duong y
+                // -1 +1
+                if (dirindex == 2)
+                {
+                    mulx = -1;
+                }
+                else if (dirindex == 1)
+                {
+                    muly = -1;
+                }
             }
-            else
+            else if (Balls[i]->diry < 0)
             {
-                muly = -1;
+                // Ball dang di chuyen theo chieu am y
+                // -1 -1
+                if (dirindex == 2)
+                {
+                    mulx = -1;
+                }
+                else if (dirindex == 3)
+                {
+                    muly = -1;
+                }
             }
         }
+
+        // Dinh huong lai direction cho ball
+        Balls[i]->SetDirection(mulx*Balls[i]->dirx, muly*Balls[i]->diry);
     }
-    else if (ball->dirx < 0)
-    {
-        // Ball => - x direction
-        if (ball->diry > 0)
-        {
-            // Ball => + y direction
-
-            if (dirindex == 2 || dirindex == 3)
-            {
-                mulx = -1;
-            }
-            else
-            {
-                muly = -1;
-            }
-        }
-        else if (ball->diry < 0)
-        {
-            // Ball => - y direction
-
-            if (dirindex == 1 || dirindex == 2)
-            {
-                mulx = -1;
-            }
-            else
-            {
-                muly = -1;
-            }
-        }
-    }
-
-    // Ball's new direction = old direction * determined direction factors
-    ball->SetDirection(mulx*ball->dirx, muly*ball->diry);
 }
 
 
@@ -859,7 +843,11 @@ void Game::Render(float delta)
     background -> Render(delta);
     board->Render(delta);
     paddle->Render(delta);
-    ball->Render(delta);
+    for (int i = 0; i<Balls.size(); i++)
+    {
+        Balls[i]->Render(delta);
+    }
+
     for (int i = 0; i<Items.size(); i++)
     {
         Items[i]->Render(delta);
@@ -1001,7 +989,6 @@ void Game::raiseItem()
     }
 }
 
-
 bool Game::isPowerUp(Item* item)
 {
     return paddle->IsCollides(item);
@@ -1011,14 +998,29 @@ void Game::powerUpChange(Item* item)
 {
     if (isPowerUp(item))
     {
+        lastTime = SDL_GetTicks();
         item->y = 800;
         switch(item->itemChosen)
         {
         case 0:
-            ball->bigBall();
+        {
+            for (int i = 0; i<Balls.size(); i++)
+            {
+                Balls[i]->bigBall();
+            }
             break;
+        }
+
         case 1:
-            paddle->expandPaddle();
+            paddle->bigPaddle();
+            break;
+        case 2:
+            Balls.push_back(new Ball(renderer));
+            Balls.push_back(new Ball(renderer));
+            ResetBall(Balls[Balls.size()-1]);
+            Balls[Balls.size()-1]->SetDirection(-1,-1);
+            ResetBall(Balls[Balls.size()-2]);
+            Balls[Balls.size()-1]->SetDirection(1,-1);
             break;
         default:
             break;
@@ -1030,17 +1032,18 @@ void Game::powerUpChange(Item* item)
         {
         case 0:
             std::cout << SDL_GetTicks() - lastTime << std::endl;
-            if (SDL_GetTicks() > 5000 + lastTime)
+            if (SDL_GetTicks() > 3000 + lastTime)
             {
-                lastTime = SDL_GetTicks();
-                ball->normalBall();
+                for (int i = 0; i<Balls.size(); i++)
+                {
+                    Balls[i]->normalBall();
+                }
             }
             break;
         case 1:
             std::cout << SDL_GetTicks() - lastTime << std::endl;
-            if (SDL_GetTicks() > 5000 + lastTime)
+            if (SDL_GetTicks() > 3000 + lastTime)
             {
-                lastTime = SDL_GetTicks();
                 paddle->normalPaddle();
             }
             break;

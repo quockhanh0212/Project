@@ -1988,16 +1988,16 @@
 1556634894 source:c:\users\user\desktop\gameproject\projectpong\paddle.cpp
 	"Paddle.h"
 
-1564829877 source:c:\users\cotarna\desktop\myproject\projectpong\background.cpp
+1565320628 source:c:\users\cotarna\desktop\myproject\projectpong\background.cpp
 	"Background.h"
 
 1564829869 c:\users\cotarna\desktop\myproject\projectpong\background.h
 	"Object.h"
 
-1565150043 source:c:\users\cotarna\desktop\myproject\projectpong\ball.cpp
+1565413860 source:c:\users\cotarna\desktop\myproject\projectpong\ball.cpp
 	"Ball.h"
 
-1565149637 c:\users\cotarna\desktop\myproject\projectpong\ball.h
+1565414707 c:\users\cotarna\desktop\myproject\projectpong\ball.h
 	"Object.h"
 	<math.h>
 	<iostream>
@@ -2006,7 +2006,7 @@
 	<fstream>
 	<vector>
 
-1565117948 source:c:\users\cotarna\desktop\myproject\projectpong\board.cpp
+1565320642 source:c:\users\cotarna\desktop\myproject\projectpong\board.cpp
 	"Board.h"
 
 1565060983 c:\users\cotarna\desktop\myproject\projectpong\board.h
@@ -2016,10 +2016,10 @@
 	<iostream>
 	<string>
 
-1565149941 source:c:\users\cotarna\desktop\myproject\projectpong\game.cpp
+1565440870 source:c:\users\cotarna\desktop\myproject\projectpong\game.cpp
 	"Game.h"
 
-1565146468 c:\users\cotarna\desktop\myproject\projectpong\game.h
+1565440870 c:\users\cotarna\desktop\myproject\projectpong\game.h
 	<SDL.h>
 	<SDL_image.h>
 	<SDL_ttf.h>
@@ -2035,6 +2035,7 @@
 	"Paddle.h"
 	"Ball.h"
 	"item.h"
+	"Bullet.h"
 
 1564829662 c:\users\cotarna\desktop\myproject\projectpong\library\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl.h
 	"SDL_main.h"
@@ -2398,8 +2399,10 @@
 	"begin_code.h"
 	"close_code.h"
 
-1565088524 c:\users\cotarna\desktop\myproject\projectpong\paddle.h
+1565315677 c:\users\cotarna\desktop\myproject\projectpong\paddle.h
 	"Object.h"
+	"Bullet.h"
+	<vector>
 
 1564829664 source:c:\users\cotarna\desktop\myproject\projectpong\main.cpp
 	"main.h"
@@ -2407,16 +2410,16 @@
 1564829664 c:\users\cotarna\desktop\myproject\projectpong\main.h
 	"game.h"
 
-1565088524 source:c:\users\cotarna\desktop\myproject\projectpong\paddle.cpp
+1565320660 source:c:\users\cotarna\desktop\myproject\projectpong\paddle.cpp
 	"Paddle.h"
 
-1564830472 c:\users\cotarna\desktop\myproject\projectpong\object.h
+1565320711 c:\users\cotarna\desktop\myproject\projectpong\object.h
 	<SDL.h>
 	<SDL_image.h>
 	<SDL_ttf.h>
 	<SDL_mixer.h>
 
-1564829957 source:c:\users\cotarna\desktop\myproject\projectpong\object.cpp
+1565320800 source:c:\users\cotarna\desktop\myproject\projectpong\object.cpp
 	"Object.h"
 
 1564991828 source:c:\users\cotarna\desktop\myproject\projectpong\powerup.cpp
@@ -2428,19 +2431,19 @@
 	<time.h>
 	<iostream>
 
-1564998826 source:c:\users\cotarna\desktop\myproject\projectpong\item.cpp
+1565424229 source:c:\users\cotarna\desktop\myproject\projectpong\item.cpp
 	"Item.h"
 
-1565004088 c:\users\cotarna\desktop\myproject\projectpong\item.h
+1565404964 c:\users\cotarna\desktop\myproject\projectpong\item.h
 	"Object.h"
 	<stdlib.h>
 	<time.h>
 	<iostream>
 
-1565145935 source:c:\users\cotarna\desktop\myproject\projectpong\bullet.cpp
+1565320637 source:c:\users\cotarna\desktop\myproject\projectpong\bullet.cpp
 	"Bullet.h"
 
-1565146128 c:\users\cotarna\desktop\myproject\projectpong\bullet.h
+1565167699 c:\users\cotarna\desktop\myproject\projectpong\bullet.h
 	"Object.h"
 	<stdlib.h>
 	<time.h>

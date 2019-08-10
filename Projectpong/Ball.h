@@ -30,6 +30,7 @@ public:
     void bigBall();
     bool isBigBall();
     void normalBall();
+    void smallBall();
     void setBallSpeed();
 
 private:

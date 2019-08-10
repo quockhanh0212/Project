@@ -1,6 +1,7 @@
 #include "Paddle.h"
 
-Paddle::Paddle(SDL_Renderer* renderer): Object(renderer) {
+Paddle::Paddle(SDL_Renderer* renderer)
+{
     SDL_Surface* surface = IMG_Load("PNG//paddle.png");
     texture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
@@ -14,20 +15,35 @@ Paddle::Paddle(SDL_Renderer* renderer): Object(renderer) {
     y = 610;
 }
 
-Paddle::~Paddle() {
+Paddle::~Paddle()
+{
     // Clean resources
     SDL_DestroyTexture(texture);
 }
 
 
-void Paddle::Update(float delta) {
-
+void Paddle::Update(float delta)
+{
+    for (int i = 0; i < Bullets.size(); i++)
+    {
+        int xBullet = Bullets.at(i)->x;
+        int yBullet = Bullets.at(i)->y;
+        if (yBullet < 0)
+        {
+            Bullet* pbullet = Bullets.at(i);
+            Bullets.erase(Bullets.begin() + i--);
+            delete pbullet;
+            pbullet = NULL;
+        }
+    }
 }
 
 
-void Paddle::Render(float delta) {
+void Paddle::Render(float delta)
+{
 
-    if ( width_frame> 0 && height_frame > 0 ) {
+    if ( width_frame> 0 && height_frame > 0 )
+    {
 
         frame_clip[0].x = 0;
         frame_clip[0].y = 0;
@@ -46,7 +62,8 @@ void Paddle::Render(float delta) {
     }
 
     frame++;
-    if (frame == 3) frame = 0;
+    if (frame == 3)
+        frame = 0;
 
     SDL_Rect drect;
     drect.x = (int)(x + 0.5f);
@@ -57,7 +74,7 @@ void Paddle::Render(float delta) {
     SDL_RenderCopy(renderer, texture, &frame_clip[frame], &drect);
 }
 
-void Paddle::expandPaddle()
+void Paddle::bigPaddle()
 {
     width = 1.3*width_frame;
 }
@@ -66,4 +83,20 @@ void Paddle::normalPaddle()
 {
     width = 128;
     height = 32;
+}
+
+void Paddle::smallPaddle()
+{
+    width = 0.5*width_frame;
+    height = 0.5*height_frame;
+}
+
+void Paddle::addBullet()
+{
+    Bullet* newBullet1 = new Bullet(renderer);
+    Bullet* newBullet2 = new Bullet(renderer);
+    newBullet1->x = x;
+    newBullet2->x = x + width;
+    Bullets.push_back(newBullet1);
+    Bullets.push_back(newBullet2);
 }

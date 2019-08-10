@@ -1,6 +1,6 @@
 #include "Background.h"
 
-Background :: Background(SDL_Renderer* renderer) : Object(renderer) {
+Background :: Background(SDL_Renderer* renderer) {
     SDL_Surface* surface = IMG_Load("PNG//background.png");
     texture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);

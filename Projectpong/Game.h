@@ -28,14 +28,13 @@
 #include "Paddle.h"
 #include "Ball.h"
 #include "item.h"
+#include "Bullet.h"
 
 
 #define FPS_DELAY 15
 #define SCORE_PER_BRICK 1
 
-const int ITEM_FREQ = 2000;
-const int COUNT_DOWN = 1000;
-
+const int ITEM_FREQ = 1000;
 
 class Game {
 public:
@@ -47,6 +46,8 @@ public:
 
     //Game statistics
     std::vector<Item*> Items;
+    std::vector<Ball*> Balls;
+
     int LifeCount ;
     int GameScore;
     int HighScore;
@@ -71,13 +72,14 @@ private:
 
     // Test
     float testx, testy;
+    float delta;
 
     Background* background;
     Board* board;
     Paddle* paddle;
-    Ball* ball;
     Item* item;
 
+    int start = 1;
     bool paddlestick;
 
     void Clean();
@@ -89,7 +91,7 @@ private:
     void Gameover();
 
     void ResetPaddle();
-    void ResetBall();
+    void ResetBall(Ball* ball);
 
     void SetPaddleX(float x);
     void isBoardCollides();
@@ -103,13 +105,13 @@ private:
     void ScoreUpdate(int score, int highscore, int hit);
 
     int delay = ITEM_FREQ;
-    int countDownBall = COUNT_DOWN;
-    int countDownPaddle = COUNT_DOWN;
     unsigned int lastTime = 0;
     void raiseItem();
+    void raiseBullet();
 
     bool isPowerUp(Item* item);
     void powerUpChange(Item* item);
+
 };
 
 #endif

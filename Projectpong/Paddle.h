@@ -2,6 +2,9 @@
 #define PADDLE_H_
 
 #include "Object.h"
+#include "Bullet.h"
+#include <vector>
+
 
 class Paddle: public Object {
 public:
@@ -12,8 +15,12 @@ public:
     void Render(float delta);
     SDL_Rect frame_clip [3];
     int frame ;
-    void expandPaddle();
+    void bigPaddle();
     void normalPaddle();
+    void smallPaddle();
+    void addBullet();
+    std::vector<Bullet*> Bullets;
+
 private:
     SDL_Texture* texture;
 
