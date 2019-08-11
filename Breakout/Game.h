@@ -34,7 +34,7 @@
 #define FPS_DELAY 15
 #define SCORE_PER_BRICK 1
 
-const int ITEM_FREQ = 1000;
+const int ITEM_FREQ = 2500;
 
 class Game {
 public:

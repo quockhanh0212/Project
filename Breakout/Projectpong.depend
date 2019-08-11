@@ -2016,10 +2016,10 @@
 	<iostream>
 	<string>
 
-1565482096 source:c:\users\cotarna\desktop\myproject\projectpong\game.cpp
+1565488340 source:c:\users\cotarna\desktop\myproject\projectpong\game.cpp
 	"Game.h"
 
-1565482081 c:\users\cotarna\desktop\myproject\projectpong\game.h
+1565489530 c:\users\cotarna\desktop\myproject\projectpong\game.h
 	<SDL.h>
 	<SDL_image.h>
 	<SDL_ttf.h>
