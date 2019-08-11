@@ -1,6 +1,6 @@
 #include "Item.h"
 
-SDL_Texture* Item::texture[4] = {nullptr, nullptr, nullptr};
+SDL_Texture* Item::texture[3] = {NULL, NULL, NULL};
 void Item::loadTexture()
 {
     SDL_Surface* surface = IMG_Load("PNG//bigball.png");
@@ -17,7 +17,7 @@ void Item::loadTexture()
 
 }
 Item::Item(SDL_Renderer* renderer) {
-    itemChosen = rand()%4;
+    itemChosen = rand()%3;
 
     width = 40;
     height = 40;
@@ -28,7 +28,7 @@ Item::Item(SDL_Renderer* renderer) {
 
 Item::~Item() {
     //Clean resources
-    SDL_DestroyTexture(texture[4]);
+    SDL_DestroyTexture(texture[3]);
 }
 
 

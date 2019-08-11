@@ -6,7 +6,7 @@
 #define GUN 2
 #define TRIPLE 3
 
-const float ITEM_SPEED = 2;
+const float ITEM_SPEED = 1.5;
 
 
 #include "Object.h"
@@ -27,7 +27,7 @@ public:
     static void loadTexture();
 
 private:
-    static SDL_Texture* texture[4];
+    static SDL_Texture* texture[3];
     int speed;
 };
 

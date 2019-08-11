@@ -5,7 +5,6 @@
 
 #include <math.h>
 #include <iostream>
-//#include <iostream>
 #include <stdio.h>
 #include <string>
 #include <fstream>
@@ -13,7 +12,7 @@
 
 
 // Define a ball speed in pixels per second
-const float BALL_SPEED = 550;
+const float BALL_SPEED = 400;
 
 class Ball: public Object {
 public:

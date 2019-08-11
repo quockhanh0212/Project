@@ -21,7 +21,7 @@ Ball::~Ball() {
 void Ball::Update(float delta) {
     x += dirx * delta;
     y += diry * delta;
-    //setBallSpeed();
+    setBallSpeed();
 }
 
 void Ball::Render(float delta) {
@@ -65,17 +65,12 @@ void Ball::smallBall()
 
 void Ball::setBallSpeed()
 {
-    unsigned int currentTime = SDL_GetTicks();
-    if (currentTime > 5000 + lastTime)
+    if (SDL_GetTicks() > 5000 + lastTime)
     {
-        this->speed = this->speed + 5;
-        lastTime = currentTime;
+        this->speed = this->speed + 7;
+        lastTime = SDL_GetTicks();
     }
-
 }
 
-//void Ball::setBallBeginPosition()
-//{
-//
-//}
+
 

@@ -1994,10 +1994,10 @@
 1564829869 c:\users\cotarna\desktop\myproject\projectpong\background.h
 	"Object.h"
 
-1565413860 source:c:\users\cotarna\desktop\myproject\projectpong\ball.cpp
+1565487790 source:c:\users\cotarna\desktop\myproject\projectpong\ball.cpp
 	"Ball.h"
 
-1565414707 c:\users\cotarna\desktop\myproject\projectpong\ball.h
+1565480932 c:\users\cotarna\desktop\myproject\projectpong\ball.h
 	"Object.h"
 	<math.h>
 	<iostream>
@@ -2016,10 +2016,10 @@
 	<iostream>
 	<string>
 
-1565440870 source:c:\users\cotarna\desktop\myproject\projectpong\game.cpp
+1565482096 source:c:\users\cotarna\desktop\myproject\projectpong\game.cpp
 	"Game.h"
 
-1565440870 c:\users\cotarna\desktop\myproject\projectpong\game.h
+1565482081 c:\users\cotarna\desktop\myproject\projectpong\game.h
 	<SDL.h>
 	<SDL_image.h>
 	<SDL_ttf.h>
@@ -2431,10 +2431,10 @@
 	<time.h>
 	<iostream>
 
-1565424229 source:c:\users\cotarna\desktop\myproject\projectpong\item.cpp
+1565484261 source:c:\users\cotarna\desktop\myproject\projectpong\item.cpp
 	"Item.h"
 
-1565404964 c:\users\cotarna\desktop\myproject\projectpong\item.h
+1565484256 c:\users\cotarna\desktop\myproject\projectpong\item.h
 	"Object.h"
 	<stdlib.h>
 	<time.h>

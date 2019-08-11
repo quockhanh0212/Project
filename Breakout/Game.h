@@ -78,6 +78,7 @@ private:
     Board* board;
     Paddle* paddle;
     Item* item;
+    Ball* ball;
 
     int start = 1;
     bool paddlestick;
@@ -91,7 +92,7 @@ private:
     void Gameover();
 
     void ResetPaddle();
-    void ResetBall(Ball* ball);
+    void setBeginPosBall(Ball* ball);
 
     void SetPaddleX(float x);
     void isBoardCollides();
@@ -99,7 +100,7 @@ private:
     void isPaddleCollides();
     void isBrickCollides();
     void isBrickCollides2();
-    void BallBrickResponse(int dirindex);
+    void BallBrickResponse(int dirindex, Ball* ball);
     int BrickCount();
 
     void ScoreUpdate(int score, int highscore, int hit);
@@ -107,7 +108,6 @@ private:
     int delay = ITEM_FREQ;
     unsigned int lastTime = 0;
     void raiseItem();
-    void raiseBullet();
 
     bool isPowerUp(Item* item);
     void powerUpChange(Item* item);

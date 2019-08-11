@@ -72,10 +72,6 @@ bool Game::Init()
     if (hit_sound == NULL )
         std::cout << "Error loading hit sound: " << SDL_GetError() << std:: endl;
 
-    levelup = Mix_LoadWAV("Sound//levelup.wav");
-    if (levelup == NULL )
-        std::cout << "Error loading hit sound: " << SDL_GetError() << std:: endl;
-
     brickhit = Mix_LoadWAV("Sound//brickhit.wav");
     if (brickhit == NULL )
         std::cout << "Error loading hit sound: " << SDL_GetError() << std:: endl;
@@ -108,13 +104,11 @@ void Game::Clean()
 
 void Game::Run()
 {
-    //framesStart = SDL_GetTicks();
     GameMenu();
-    //Sound();
+
     background = new Background (renderer);
     board = new Board(renderer);
     paddle = new Paddle(renderer);
-
     Ball* ball = new Ball(renderer);
     Balls.push_back(ball);
     NewGame();
@@ -165,7 +159,6 @@ void Game::Run()
         else
         {
             HighScoreIn >> HighScore;
-            //std::cout << HighScore;
         }
 
         // Update and render the game
@@ -176,7 +169,6 @@ void Game::Run()
             std::ofstream HighScoreOut("highscore.txt");
             HighScore = GameScore;
             HighScoreOut << HighScore;
-            //std::cout << HighScore;
         }
 
         Render(delta);
@@ -194,11 +186,12 @@ void Game::Run()
     delete paddle;
     delete background;
     delete board;
+
     Balls.erase(Balls.begin());
 
     for (int i = 0; i<Items.size(); i++)
     {
-        delete Items[i];
+        Items.erase(Items.begin()+i);
     }
 
 
@@ -368,6 +361,19 @@ void Game::NewGame()
     ResetPaddle();
 }
 
+void Game::ResetPaddle()
+{
+    paddlestick = true;
+    setBeginPosBall(Balls[0]);
+    hit_times = 0;
+}
+
+void Game::setBeginPosBall(Ball* ball)
+{
+    ball->x = paddle->x + paddle->width/2 - ball->width/2;
+    ball->y = paddle->y - ball->height;
+}
+
 int Game::BrickCount()
 {
     int brickcount = 0;
@@ -447,21 +453,6 @@ void Game :: Gameover()
     TTF_CloseFont(text);
 }
 
-
-void Game::ResetPaddle()
-{
-    paddlestick = true;
-    ResetBall(Balls[0]);
-    //ResetBullet(bullet);
-    hit_times = 0;
-}
-
-void Game::ResetBall(Ball* ball)
-{
-    ball->x = paddle->x + paddle->width/2 - ball->width/2;
-    ball->y = paddle->y - ball->height;
-}
-
 void Game::Update(float delta)
 {
 
@@ -482,17 +473,13 @@ void Game::Update(float delta)
         if (paddlestick)
         {
             paddlestick = false;
-            //Balls[0]->SetDirection(1, 1);
-            for (int i = 0; i<Balls.size(); i++)
-            {
-                Balls[i]->SetDirection(1, 1);
-            }
+            Balls[0]->SetDirection(1, 1);
         }
     }
 
     if (paddlestick)
     {
-        ResetBall(Balls[0]);
+        setBeginPosBall(Balls[0]);
     }
 
     isBoardCollides();
@@ -504,11 +491,12 @@ void Game::Update(float delta)
 
 
     if (!paddlestick)
+    {
         for (int i = 0; i<Balls.size(); i++)
         {
             Balls[i]->Update(delta);
         }
-
+    }
 }
 
 void Game::SetPaddleX(float x)
@@ -551,8 +539,8 @@ void Game::isBoardCollides()
             {
                 LifeCount--;
                 board -> hearts[LifeCount].state = false;
-                ResetPaddle();
                 Balls.push_back(new Ball(renderer));
+                ResetPaddle();
             }
         }
     }
@@ -612,7 +600,6 @@ void Game::isPaddleCollides()
             Balls[i]->SetDirection(GetReflection(ballcenterx - paddle->x), -1);
             if ( Mix_PlayChannel(-1,hit_sound,0) == -1)
                 std:: cout << "Error playing sound: " << Mix_GetError << std::endl;
-            //ball->SetDirection(0, -1);
         }
     }
 
@@ -727,13 +714,13 @@ void Game::isBrickCollides()
                             {
                                 // Bottom
                                 Balls[k]->y += ysize + 0.01f; // Move out of collision
-                                BallBrickResponse(3);
+                                BallBrickResponse(3, Balls[k]);
                             }
                             else
                             {
                                 // Top
                                 Balls[k]->y -= ysize + 0.01f; // Move out of collision
-                                BallBrickResponse(1);
+                                BallBrickResponse(1, Balls[k]);
                             }
                         }
                         else
@@ -742,17 +729,15 @@ void Game::isBrickCollides()
                             {
                                 // Left
                                 Balls[k]->x -= xsize + 0.01f; // Move out of collision
-                                BallBrickResponse(0);
+                                BallBrickResponse(0, Balls[k]);
                             }
                             else
                             {
                                 // Right
                                 Balls[k]->x += xsize + 0.01f; // Move out of collision
-                                BallBrickResponse(2);
+                                BallBrickResponse(2, Balls[k]);
                             }
                         }
-
-                        return;
                     }
                 }
             }
@@ -761,78 +746,77 @@ void Game::isBrickCollides()
 }
 
 
-void Game::BallBrickResponse(int dirindex)
+void Game::BallBrickResponse(int dirindex, Ball* ball)
 {
-    for (int i = 0; i<Balls.size(); i++)
+    // Define statistic 0: Left, 1: Top, 2: Right, 3: Bottom
+
+    // Direction factors
+    int mulx = 1;
+    int muly = 1;
+
+    if (ball->dirx > 0)
     {
-        // Direction factors
-        int mulx = 1;
-        int muly = 1;
-
-        if (Balls[i]->dirx > 0)
+        // ball => + x direction
+        if (ball->diry > 0)
         {
-            // Ball dang di chuyen theo chieu duong x
-            if (Balls[i]->diry > 0)
+            // Ball => + y direction
+
+            if (dirindex == 0 || dirindex == 3)
             {
-                // Ball dang di chuyen theo chieu duong y
-                // +1 +1
-                if (dirindex == 0)
-                {
-                    mulx = -1;
-                }
-                else if (dirindex == 1)
-                {
-                    muly = -1;
-                }
+                mulx = -1;
             }
-            else if (Balls[i]->diry < 0)
+            else
             {
-                // Ball dang di chuyen theo chieu am y
-                // +1 -1
-                if (dirindex == 0)
-                {
-                    mulx = -1;
-                }
-                else if (dirindex == 3)
-                {
-                    muly = -1;
-                }
+                muly = -1;
             }
         }
-        else if (Balls[i]->dirx < 0)
+        else if (ball->diry < 0)
         {
-            // Ball dang di chuyen theo chieu am x
-            if (Balls[i]->diry > 0)
+            // Ball => - y direction
+
+            if (dirindex == 0 || dirindex == 1)
             {
-                // Ball dang di chuyen theo chieu duong y
-                // -1 +1
-                if (dirindex == 2)
-                {
-                    mulx = -1;
-                }
-                else if (dirindex == 1)
-                {
-                    muly = -1;
-                }
+                mulx = -1;
             }
-            else if (Balls[i]->diry < 0)
+            else
             {
-                // Ball dang di chuyen theo chieu am y
-                // -1 -1
-                if (dirindex == 2)
-                {
-                    mulx = -1;
-                }
-                else if (dirindex == 3)
-                {
-                    muly = -1;
-                }
+                muly = -1;
             }
         }
-
-        // Dinh huong lai direction cho ball
-        Balls[i]->SetDirection(mulx*Balls[i]->dirx, muly*Balls[i]->diry);
     }
+    else if (ball->dirx < 0)
+    {
+        // Ball => - x direction
+        if (ball->diry > 0)
+        {
+            // Ball => + y direction
+
+            if (dirindex == 2 || dirindex == 3)
+            {
+                mulx = -1;
+            }
+            else
+            {
+                muly = -1;
+            }
+        }
+        else if (ball->diry < 0)
+        {
+            // Ball => - y direction
+
+            if (dirindex == 1 || dirindex == 2)
+            {
+                mulx = -1;
+            }
+            else
+            {
+                muly = -1;
+            }
+        }
+    }
+
+    // Ball's new direction = old direction * determined direction factors
+    ball->SetDirection(mulx*ball->dirx, muly*ball->diry);
 }
 
 
@@ -888,32 +872,6 @@ void Game:: ScoreUpdate(int score, int highscore, int hit)
         length = 5*SCORE_WIDTH;
     }
 
-    //Levelup sound
-    if ( score >= 100 && score< 500)
-        level = 1;
-    else if ( score >= 500 && score < 1000)
-        level = 2;
-    else if ( score >= 1000 && score < 10000)
-        level = 3;
-
-    if (level == 1 && onetime_1 == true)
-    {
-        if ( Mix_PlayChannel(-1,levelup,1) == -1)
-            std:: cout << "Error playing sound: " << Mix_GetError << std::endl;
-        onetime_1 = false;
-    }
-    else if (level == 2 && onetime_2 == true)
-    {
-        if ( Mix_PlayChannel(-1,levelup,1) == -1)
-            std:: cout << "Error playing sound: " << Mix_GetError << std::endl;
-        onetime_2 = false;
-    }
-    else if (level == 3 && onetime_3 == true)
-    {
-        if ( Mix_PlayChannel(-1,levelup,1) == -1)
-            std:: cout << "Error playing sound: " << Mix_GetError << std::endl;
-        onetime_3 = false;
-    }
 
     TTF_Font* score_font = TTF_OpenFont("font//arcade.ttf", 60);
     if ( score_font == NULL)
@@ -1017,9 +975,9 @@ void Game::powerUpChange(Item* item)
         case 2:
             Balls.push_back(new Ball(renderer));
             Balls.push_back(new Ball(renderer));
-            ResetBall(Balls[Balls.size()-1]);
+            setBeginPosBall(Balls[Balls.size()-1]);
             Balls[Balls.size()-1]->SetDirection(-1,-1);
-            ResetBall(Balls[Balls.size()-2]);
+            setBeginPosBall(Balls[Balls.size()-2]);
             Balls[Balls.size()-1]->SetDirection(1,-1);
             break;
         default:
@@ -1031,7 +989,6 @@ void Game::powerUpChange(Item* item)
         switch(item->itemChosen)
         {
         case 0:
-            std::cout << SDL_GetTicks() - lastTime << std::endl;
             if (SDL_GetTicks() > 3000 + lastTime)
             {
                 for (int i = 0; i<Balls.size(); i++)
@@ -1041,7 +998,6 @@ void Game::powerUpChange(Item* item)
             }
             break;
         case 1:
-            std::cout << SDL_GetTicks() - lastTime << std::endl;
             if (SDL_GetTicks() > 3000 + lastTime)
             {
                 paddle->normalPaddle();
