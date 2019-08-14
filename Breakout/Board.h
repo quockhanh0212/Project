@@ -28,12 +28,6 @@
 #define GAMEOVER_WIDTH 650
 #define GAMEOVER_HEIGHT 460
 
-class Score {
-public:
-    bool state;
-    int type;
-};
-
 class Heart {
 public:
     bool state;
@@ -70,7 +64,6 @@ private:
     SDL_Texture* sidetexture;
     SDL_Texture* logotexture;
     SDL_Texture* hearttexture;
-    SDL_Texture* explosiontexture;
     SDL_Texture* scoreWordTexture;
     SDL_Texture* highscoreWordTexture;
 

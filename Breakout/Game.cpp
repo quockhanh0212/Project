@@ -3,7 +3,6 @@
 
 Mix_Music *music = NULL;
 Mix_Chunk *hit_sound = NULL;
-Mix_Chunk *levelup = NULL;
 Mix_Chunk *brickhit = NULL;
 Mix_Chunk *bighit = NULL;
 Mix_Chunk *welldone = NULL;
@@ -97,7 +96,6 @@ void Game::Clean()
     Mix_FreeChunk(hit_sound);
     Mix_FreeMusic(music);
     Mix_FreeChunk(welldone);
-    Mix_FreeChunk(levelup);
     Mix_FreeChunk(brickhit);
     Mix_FreeChunk(bighit);
 }
@@ -348,14 +346,9 @@ void Game::GameMenu()
 void Game::NewGame()
 {
     paddle->frame = 0;
-    explosion_frame = 0;
     LifeCount = 3;
     GameScore = 0;
     hit_times = 0;
-    level = 0;
-    onetime_1 = true;
-    onetime_2 = true;
-    onetime_3 = true;
 
     board->CreateLevel();
     ResetPaddle();
@@ -533,8 +526,8 @@ void Game::isBoardCollides()
         else if (Balls[i]->y > board->y + board->height)
         {
             // Bottom
-            Balls.erase(Balls.begin()+i);
             // Ball lost
+            Balls.erase(Balls.begin()+i);
             if (Balls.size() == 0)
             {
                 LifeCount--;
@@ -575,8 +568,7 @@ float Game::GetReflection(float hitx)
         hitx = paddle->width;
     }
 
-    // Everything to the left of the center of the paddle is reflected to the left
-    // while everything right of the center is reflected to the right
+
     hitx -= paddle->width / 2.0f;
 
     // Scale the reflection ranging from -2.0f to 2.0f
@@ -658,7 +650,6 @@ void Game::isBrickCollides()
                         }
 
 
-                        // Asume the ball goes slow enough to not skip through the bricks
 
                         // Calculate ysize
                         float ymin = 0;
@@ -748,75 +739,50 @@ void Game::isBrickCollides()
 
 void Game::BallBrickResponse(int dirindex, Ball* ball)
 {
-    // Define statistic 0: Left, 1: Top, 2: Right, 3: Bottom
+    // dirindex 0: Left, 1: Top, 2: Right, 3: Bottom
 
-    // Direction factors
-    int mulx = 1;
-    int muly = 1;
+	// Direction factors
+	int mulx = 1;
+	int muly = 1;
 
-    if (ball->dirx > 0)
-    {
-        // ball => + x direction
-        if (ball->diry > 0)
-        {
-            // Ball => + y direction
+	if (ball->dirx > 0) {
+		if (ball->diry > 0) {
+			if (dirindex == 0) {
+				mulx = -1;
+			}
+			else if (dirindex == 1) {
+				muly = -1;
+			}
+		}
+		else if (ball->diry < 0) {
+			if (dirindex == 0) {
+				mulx = -1;
+			}
+			else if (dirindex == 3) {
+				muly = -1;
+			}
+		}
+	}
+	else if (ball->dirx < 0) {
+		if (ball->diry > 0) {
+			if (dirindex == 2) {
+				mulx = -1;
+			}
+			else if (dirindex == 1){
+				muly = -1;
+			}
+		}
+		else if (ball->diry < 0) {
+			if (dirindex == 2) {
+				mulx = -1;
+			}
+			else if (dirindex == 3) {
+				muly = -1;
+			}
+		}
+	}
 
-            if (dirindex == 0 || dirindex == 3)
-            {
-                mulx = -1;
-            }
-            else
-            {
-                muly = -1;
-            }
-        }
-        else if (ball->diry < 0)
-        {
-            // Ball => - y direction
-
-            if (dirindex == 0 || dirindex == 1)
-            {
-                mulx = -1;
-            }
-            else
-            {
-                muly = -1;
-            }
-        }
-    }
-    else if (ball->dirx < 0)
-    {
-        // Ball => - x direction
-        if (ball->diry > 0)
-        {
-            // Ball => + y direction
-
-            if (dirindex == 2 || dirindex == 3)
-            {
-                mulx = -1;
-            }
-            else
-            {
-                muly = -1;
-            }
-        }
-        else if (ball->diry < 0)
-        {
-            // Ball => - y direction
-
-            if (dirindex == 1 || dirindex == 2)
-            {
-                mulx = -1;
-            }
-            else
-            {
-                muly = -1;
-            }
-        }
-    }
-
-    // Ball's new direction = old direction * determined direction factors
-    ball->SetDirection(mulx*ball->dirx, muly*ball->diry);
+	ball->SetDirection(mulx*ball->dirx, muly*ball->diry);
 }
 
 

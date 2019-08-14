@@ -52,14 +52,9 @@ public:
     int GameScore;
     int HighScore;
     int hit_times;
-    int level;
-    bool onetime_1;
-    bool onetime_2;
-    bool onetime_3;
 
     SDL_Rect frame_clip [3];
-    int explosion_frame;
-    void set_clips ();
+
 
 private:
     SDL_Window* window;
@@ -99,7 +94,6 @@ private:
     float GetReflection(float hitx);
     void isPaddleCollides();
     void isBrickCollides();
-    void isBrickCollides2();
     void BallBrickResponse(int dirindex, Ball* ball);
     int BrickCount();
 

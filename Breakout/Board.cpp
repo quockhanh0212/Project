@@ -22,10 +22,6 @@ Board::Board(SDL_Renderer* renderer) {
     hearttexture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
 
-    surface = IMG_Load("PNG//explosion.png");
-    explosiontexture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
-
     TTF_Font* score_font = TTF_OpenFont("font//arcade.ttf", 60);
     if ( score_font == NULL) {
         std::cout << "Error load score font: " << SDL_GetError() << std::endl;
@@ -58,7 +54,8 @@ Board::~Board() {
     SDL_DestroyTexture(bricktexture);
     SDL_DestroyTexture(sidetexture);
     SDL_DestroyTexture(brokenbricktexture);
-
+    SDL_DestroyTexture(logotexture);
+    SDL_DestroyTexture(hearttexture);
 }
 
 void Board::Update(float delta) {

@@ -12,7 +12,7 @@
 
 
 // Define a ball speed in pixels per second
-const float BALL_SPEED = 400;
+const float BALL_SPEED = 500;
 
 class Ball: public Object {
 public:
@@ -29,7 +29,6 @@ public:
     void bigBall();
     bool isBigBall();
     void normalBall();
-    void smallBall();
     void setBallSpeed();
 
 private:

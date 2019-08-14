@@ -2,7 +2,6 @@
 #define PADDLE_H_
 
 #include "Object.h"
-#include "Bullet.h"
 #include <vector>
 
 
@@ -17,9 +16,6 @@ public:
     int frame ;
     void bigPaddle();
     void normalPaddle();
-    void smallPaddle();
-    void addBullet();
-    std::vector<Bullet*> Bullets;
 
 private:
     SDL_Texture* texture;

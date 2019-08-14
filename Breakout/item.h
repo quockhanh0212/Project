@@ -28,7 +28,7 @@ public:
 
 private:
     static SDL_Texture* texture[3];
-    int speed;
+    int speed = ITEM_SPEED;
 };
 
 #endif

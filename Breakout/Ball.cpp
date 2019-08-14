@@ -26,8 +26,8 @@ void Ball::Update(float delta) {
 
 void Ball::Render(float delta) {
     SDL_Rect rect;
-    rect.x = (int)(x + 0.5f);
-    rect.y = (int)(y + 0.5f);
+    rect.x = x;
+    rect.y = y;
     rect.w = width;
     rect.h = height;
     SDL_RenderCopy(renderer, texture, 0, &rect);
@@ -36,8 +36,8 @@ void Ball::Render(float delta) {
 void Ball::SetDirection(float dirx, float diry) {
     // Normalize the direction vector and multiply with BALL_SPEED
     float length = sqrt(dirx * dirx + diry * diry);
-    this->dirx = this->speed * (dirx / length);
-    this->diry = this->speed * (diry / length);
+    this->dirx = speed * (dirx / length);
+    this->diry = speed * (diry / length);
 }
 
 void Ball::bigBall()
@@ -55,12 +55,6 @@ void Ball::normalBall()
 {
     height = 24;
     width = 24;
-}
-
-void Ball::smallBall()
-{
-    width = 12;
-    height = 12;
 }
 
 void Ball::setBallSpeed()

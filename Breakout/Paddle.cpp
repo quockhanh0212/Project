@@ -24,18 +24,7 @@ Paddle::~Paddle()
 
 void Paddle::Update(float delta)
 {
-    for (int i = 0; i < Bullets.size(); i++)
-    {
-        int xBullet = Bullets.at(i)->x;
-        int yBullet = Bullets.at(i)->y;
-        if (yBullet < 0)
-        {
-            Bullet* pbullet = Bullets.at(i);
-            Bullets.erase(Bullets.begin() + i--);
-            delete pbullet;
-            pbullet = NULL;
-        }
-    }
+
 }
 
 
@@ -83,20 +72,4 @@ void Paddle::normalPaddle()
 {
     width = 128;
     height = 32;
-}
-
-void Paddle::smallPaddle()
-{
-    width = 0.5*width_frame;
-    height = 0.5*height_frame;
-}
-
-void Paddle::addBullet()
-{
-    Bullet* newBullet1 = new Bullet(renderer);
-    Bullet* newBullet2 = new Bullet(renderer);
-    newBullet1->x = x;
-    newBullet2->x = x + width;
-    Bullets.push_back(newBullet1);
-    Bullets.push_back(newBullet2);
 }

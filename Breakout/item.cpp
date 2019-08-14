@@ -34,7 +34,6 @@ Item::~Item() {
 
 void Item::Update(float delta)
 {
-    this->speed = ITEM_SPEED;
     y+= speed;
 }
 
